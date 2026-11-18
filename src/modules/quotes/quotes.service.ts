@@ -1,33 +1,36 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { Quote, QuoteDocument } from './schemas/quote.schema';
+import type { Cache } from 'cache-manager';
+import type { Model } from 'mongoose';
+import { Quote } from './schemas/quote.schema.js';
 
 @Injectable()
 export class QuotesService {
   constructor(
-    @InjectModel(Quote.name) private quoteModel: Model<QuoteDocument>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectModel(Quote.name) private readonly quoteModel: Model<Quote>,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  async create(data: any): Promise<Quote> {
+  async create(
+    data: Pick<
+      Quote,
+      'name' | 'email' | 'phone' | 'fromCity' | 'toCity' | 'weight'
+    > &
+      Partial<Pick<Quote, 'serviceType' | 'status'>>,
+  ): Promise<Quote> {
     const createdQuote = new this.quoteModel(data);
-    return createdQuote.save();
+    const quote = await createdQuote.save();
+    await this.cacheManager.del('all_quotes');
+    return quote;
   }
 
   async findAll(): Promise<Quote[]> {
-    // 1. Check Redis first
     const cached = await this.cacheManager.get<Quote[]>('all_quotes');
     if (cached) return cached;
 
-    // 2. If not in Redis, get from MongoDB
     const quotes = await this.quoteModel.find().exec();
-
-    // 3. Save to Redis for next time (60s TTL)
     await this.cacheManager.set('all_quotes', quotes, 60000);
-    
     return quotes;
   }
 }

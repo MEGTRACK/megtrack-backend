@@ -3,9 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
-import { QuotesModule } from './modules/quotes/quotes.module';
-import { TrackingModule } from './modules/tracking/tracking.module';
-import { EstimatesModule } from './modules/estimates/estimates.module';
+import { QuotesModule } from './modules/quotes/quotes.module.js';
+import { TrackingModule } from './modules/tracking/tracking.module.js';
+import { EstimatesModule } from './modules/estimates/estimates.module.js';
 
 @Module({
   imports: [

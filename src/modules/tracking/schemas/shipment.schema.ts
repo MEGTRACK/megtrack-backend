@@ -1,5 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import type { HydratedDocument } from 'mongoose';
+
+@Schema({ _id: false })
+export class ShipmentEvent {
+  @Prop({ required: true })
+  time: string;
+
+  @Prop({ required: true })
+  location: string;
+
+  @Prop({ required: true })
+  description: string;
+}
+
+export const ShipmentEventSchema = SchemaFactory.createForClass(ShipmentEvent);
 
 export type ShipmentDocument = HydratedDocument<Shipment>;
 
@@ -11,8 +25,8 @@ export class Shipment {
   @Prop({ default: 'created' })
   status: string;
 
-  @Prop({ type: Array, default: [] })
-  events: { time: string; location: string; description: string }[];
+  @Prop({ type: [ShipmentEventSchema], default: [] })
+  events: ShipmentEvent[];
 }
 
 export const ShipmentSchema = SchemaFactory.createForClass(Shipment);

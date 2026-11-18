@@ -4,7 +4,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -32,4 +32,11 @@ async function bootstrap() {
 
   Logger.log(`🚀 MEGTRACK Fastify API running on port ${port}`, 'Bootstrap');
 }
-bootstrap();
+void bootstrap().catch((error: unknown) => {
+  Logger.error(
+    'Application failed to start',
+    error instanceof Error ? error.stack : String(error),
+    'Bootstrap',
+  );
+  process.exitCode = 1;
+});
